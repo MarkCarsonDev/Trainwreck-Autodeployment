@@ -12,7 +12,14 @@ def schedule(cron_schedule):
     """
     def decorator(func):
         trigger = CronTrigger.from_crontab(cron_schedule)
-        scheduler.add_job(func, trigger, args=[func.bot])
+        
+        async def wrapper(*args, **kwargs):
+            await func(*args, **kwargs)
+        
+        def start_task(bot):
+            scheduler.add_job(wrapper, trigger, args=[bot])
+        
+        func.start_task = start_task
         return func
     return decorator
 

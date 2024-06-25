@@ -1,6 +1,5 @@
 import aiohttp
 import json
-import discord
 from discord.ext import commands
 from scheduler import schedule
 from datetime import datetime, timedelta
@@ -60,5 +59,4 @@ async def scheduled_shame_task(bot):
 
 def setup(bot):
     bot.add_command(shame)
-    scheduled_shame_task.bot = bot  # Pass the bot instance to the scheduled task
-    bot.loop.create_task(scheduled_shame_task(bot))
+    scheduled_shame_task.start_task(bot)
