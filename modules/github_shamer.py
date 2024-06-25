@@ -1,5 +1,6 @@
 import aiohttp
 import json
+import discord
 from discord.ext import commands
 from scheduler import schedule
 
@@ -7,9 +8,11 @@ SHAME_CHANNEL_ID = 1082164945438916679
 
 # Load GitHub usernames from JSON file
 def load_github_usernames():
-    with open('user_info.json', 'r') as file:
-        data = json.load(file)
-    return data
+    try:
+        with open('user_info.json', 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
 
 async def fetch_commits_in_last_week(username):
     one_week_ago = datetime.now() - timedelta(days=7)
@@ -51,8 +54,9 @@ async def shame(ctx):
 async def scheduled_shame_task(): # Replace with your Discord channel ID
     channel = bot.get_channel(SHAME_CHANNEL_ID)
     if channel:
-        await shame(channel)
+        ctx = await bot.get_context(await channel.send("Starting weekly shame task..."))
+        await shame(ctx)
 
 def setup(bot):
     bot.add_command(shame)
-    scheduled_shame_task.scheduled_task.start()
+    asyncio.create_task(scheduled_shame_task.start_task())

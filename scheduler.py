@@ -52,15 +52,15 @@ def schedule(cron_schedule):
     def decorator(func):
         parsed_schedule = parse_cron_schedule(cron_schedule)
 
-        @tasks.loop(hours=24)
         async def scheduled_task():
             await asyncio.sleep(time_until_next_schedule(parsed_schedule))
-            await func()
+            while True:
+                await func()
+                await asyncio.sleep(time_until_next_schedule(parsed_schedule))
 
-        @scheduled_task.before_loop
-        async def before_task():
-            await bot.wait_until_ready()
+        async def start_task():
+            asyncio.create_task(scheduled_task())
 
-        func.scheduled_task = scheduled_task
+        func.start_task = start_task
         return func
     return decorator
