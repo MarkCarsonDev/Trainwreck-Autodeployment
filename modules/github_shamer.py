@@ -52,8 +52,7 @@ async def shame(ctx):
         await ctx.reply(f"{discord_user.mention} has made the least commits ({min_commits}) in the last week! Shame!")
 
 @schedule("0 17 * * 5")  # At 17:00 on Friday
-async def scheduled_shame_task():
-    bot = discord.Bot()
+async def scheduled_shame_task(bot):
     channel = bot.get_channel(SHAME_CHANNEL_ID)
     if channel:
         ctx = await bot.get_context(await channel.send("Starting weekly shame task..."))
