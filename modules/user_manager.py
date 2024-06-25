@@ -1,6 +1,5 @@
 import json
 from discord.ext import commands
-from discord.ext.commands import Context
 
 USER_INFO_FILE = 'user_info.json'
 
@@ -18,7 +17,7 @@ def save_user_info(data):
         json.dump(data, file, indent=4)
 
 @commands.command()
-async def showuser(ctx: Context, user: str):
+async def showuser(ctx, user: str):
     """
     Displays all of the user's full raw JSON.
     """
@@ -30,7 +29,7 @@ async def showuser(ctx: Context, user: str):
         await ctx.reply(f"No info found for user {user}.")
 
 @commands.command()
-async def usermod(ctx: Context, user: str, operation: str, data: str):
+async def usermod(ctx, user: str, operation: str, data: str):
     """
     Modifies the user information.
     Usage:
@@ -63,11 +62,9 @@ async def usermod(ctx: Context, user: str, operation: str, data: str):
                 await ctx.reply("Invalid key list. Usage: !usermod @Mark -[\"key1\", \"key2\"]")
         except json.JSONDecodeError:
             await ctx.reply("Invalid key list. Usage: !usermod @Mark -[\"key1\", \"key2\"]")
-    else:
-        await ctx.reply("Invalid operation. Use '+' to add or update and '-' to remove keys.")
 
 @commands.command()
-async def userdump(ctx: Context):
+async def userdump(ctx):
     """
     Dumps the whole JSON file.
     """
@@ -75,7 +72,7 @@ async def userdump(ctx: Context):
     await ctx.reply(f"Full user info: ```json\n{json.dumps(user_info, indent=4)}\n```")
 
 @commands.command()
-async def setuserinfo(ctx: Context, data: str):
+async def setuserinfo(ctx, data: str):
     """
     Sets the entire userinfo file.
     Usage: !setuserinfo {json object}

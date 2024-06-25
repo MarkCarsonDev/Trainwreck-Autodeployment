@@ -61,4 +61,4 @@ async def scheduled_shame_task():
 
 def setup(bot):
     bot.add_command(shame)
-    bot.loop.create_task(scheduled_shame_task)
+    bot.loop.create_task(scheduled_shame_task(bot))

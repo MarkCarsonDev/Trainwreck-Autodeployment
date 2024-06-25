@@ -1,11 +1,8 @@
 import discord
-import os
-import json
-import time
-from datetime import datetime
 from discord.ext import commands
 from dotenv import dotenv_values
-import asyncio
+import os
+from scheduler import start_scheduler
 
 # Load configuration from .env file 
 config = dotenv_values("../.locomotion-env")
@@ -18,6 +15,7 @@ TOKEN = config["DISCORD_TOKEN"]
 TARGET_USER_ID = int(config["TARGET_USER_ID"])
 
 bot = commands.Bot(command_prefix='!', intents=intents, activity=discord.Activity(type=discord.ActivityType.watching, name="github.com/MarkCarsonDev/Trainwreck-Autodeployment"))
+
 
 async def send_message(user_id: int, message=None):
     """
@@ -38,22 +36,30 @@ async def on_ready():
     """
     print(f'{bot.user} is now running')
     await send_message(TARGET_USER_ID, "Bot has been started.")
-    #await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
+    # await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
 
-# Load the roomfinder module
-from modules.roomfinder import setup as roomfinder_setup
-roomfinder_setup(bot)
+@bot.event
+async def setup_hook():
+    """
+    Asynchronous setup hook for the bot.
+    """
+    # Load the roomfinder module
+    from modules.roomfinder import setup as roomfinder_setup
+    roomfinder_setup(bot)
 
-# Load the github module
-from modules.github import setup as github_setup
-github_setup(bot)
+    # Load the github module
+    from modules.github import setup as github_setup
+    github_setup(bot)
 
-# Load the github_shamer module
-from modules.github_shamer import setup as github_shamer_setup
-github_shamer_setup(bot)
+    # Load the github_schedule module
+    from modules.github_shamer import setup as github_schedule_setup
+    github_schedule_setup(bot)
 
-# Load the user manager module
-from modules.user_manager import setup as user_manager_setup
-user_manager_setup(bot)
+    # Load the user manager module
+    from modules.user_manager import setup as user_manager_setup
+    user_manager_setup(bot)
+
+    # Start the scheduler
+    start_scheduler()
 
 bot.run(TOKEN)
