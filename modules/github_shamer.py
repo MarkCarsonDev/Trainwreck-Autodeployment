@@ -3,6 +3,7 @@ import json
 import discord
 from discord.ext import commands
 from scheduler import schedule
+import asyncio
 
 SHAME_CHANNEL_ID = 1082164945438916679
 
