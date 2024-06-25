@@ -1,0 +1,9 @@
+{
+    "script": "locomotion.py",
+    "watch": true,
+    "ignore_watch": ["user_info.json"],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "name": "locomotion"
+}

@@ -36,7 +36,8 @@ async def usermod(ctx, user: str, operation: str, *, data: str):
     !usermod @Mark +{"key": "value"}  # Merges the new JSON object with the existing one
     !usermod @Mark -["key1", "key2"]  # Removes keys from a user
     """
-    user_id = int(user[3:-1])  # Extract user ID from mention format
+
+    user_id = user if user.isnumeric() else int(user[2:-1])  # Extract user ID from mention format
     user_info = load_user_info()
     
     if str(user_id) not in user_info:
