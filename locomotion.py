@@ -6,6 +6,7 @@ from scheduler import start_scheduler
 
 # Load configuration from .env file 
 config = dotenv_values("../.locomotion-env")
+print(config)
 
 intents = discord.Intents.default()
 intents.message_content = True
