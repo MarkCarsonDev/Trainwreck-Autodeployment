@@ -17,7 +17,7 @@ intents.message_content = True
 TOKEN = config["DISCORD_TOKEN"]
 TARGET_USER_ID = int(config["TARGET_USER_ID"])
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents, activity=discord.Activity(type=discord.ActivityType.watching, name="github.com/MarkCarsonDev/Trainwreck-Autodeployment"))
 
 async def send_message(user_id: int, message=None):
     """
@@ -38,7 +38,7 @@ async def on_ready():
     """
     print(f'{bot.user} is now running')
     await send_message(TARGET_USER_ID, "Bot has been started.")
-    await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
+    #await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
 
 # Load the roomfinder module
 from modules.roomfinder import setup as roomfinder_setup
