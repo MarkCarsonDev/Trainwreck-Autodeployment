@@ -1,7 +1,8 @@
 import json
+import os
 from discord.ext import commands
 
-USER_INFO_FILE = 'user_info.json'
+USER_INFO_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'user_info.json')
 
 # Load user information from JSON file
 def load_user_info():
