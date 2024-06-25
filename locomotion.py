@@ -1,13 +1,24 @@
+import time
+import aiohttp
+from bs4 import BeautifulSoup
 import discord
 from discord.ext import commands
 from dotenv import dotenv_values
+import asyncio
+from datetime import datetime
 import os
+import json
+import re
+from scheduler import start_scheduler
+
+
+# Load configuration from .env file 
+config = dotenv_values("../.locomotion-env")
 from scheduler import start_scheduler
 
 # Load configuration from .env file 
 config = dotenv_values("../.locomotion-env")
 print(config) # says "OrderedDict()"
-print(config["DISCORD_TOKEN"]) 
 
 intents = discord.Intents.default()
 intents.message_content = True
