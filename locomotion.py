@@ -48,4 +48,12 @@ roomfinder_setup(bot)
 from modules.github import setup as github_setup
 github_setup(bot)
 
+# Load the github_shamer module
+from modules.github_shamer import setup as github_shamer_setup
+github_shamer_setup(bot)
+
+# Load the user manager module
+from modules.user_manager import setup as user_manager_setup
+user_manager_setup(bot)
+
 bot.run(TOKEN)
