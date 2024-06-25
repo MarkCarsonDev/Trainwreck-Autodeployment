@@ -3,6 +3,7 @@ import json
 import discord
 from discord.ext import commands
 from scheduler import schedule
+from datetime import datetime, timedelta
 import asyncio
 
 SHAME_CHANNEL_ID = 1082164945438916679
@@ -52,7 +53,7 @@ async def shame(ctx):
         await ctx.reply(f"{discord_user.mention} has made the least commits ({min_commits}) in the last week! Shame!")
 
 @schedule("0 17 * * 5")  # At 17:00 on Friday
-async def scheduled_shame_task(): # Replace with your Discord channel ID
+async def scheduled_shame_task():
     channel = bot.get_channel(SHAME_CHANNEL_ID)
     if channel:
         ctx = await bot.get_context(await channel.send("Starting weekly shame task..."))
@@ -60,4 +61,4 @@ async def scheduled_shame_task(): # Replace with your Discord channel ID
 
 def setup(bot):
     bot.add_command(shame)
-    asyncio.create_task(scheduled_shame_task.start_task())
+    bot.loop.create_task(scheduled_shame_task.start_task())

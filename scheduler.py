@@ -59,6 +59,7 @@ def schedule(cron_schedule):
                 await asyncio.sleep(time_until_next_schedule(parsed_schedule))
 
         async def start_task():
+            await bot.wait_until_ready()
             asyncio.create_task(scheduled_task())
 
         func.start_task = start_task
