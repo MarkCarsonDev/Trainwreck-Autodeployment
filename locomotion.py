@@ -325,6 +325,6 @@ async def on_ready():
     """
     print(f'{bot.user} is now running')
     await send_message(TARGET_USER_ID, "Bot has been started.")
-    await bot.change_presence(activity=discord.Game(name="ray so super sexyyyyyy ahahaaaa"))
+    await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
 
 bot.run(TOKEN)
