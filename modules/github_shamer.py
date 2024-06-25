@@ -9,7 +9,7 @@ SHAME_CHANNEL_ID = 1082164945438916679
 # Load GitHub usernames from JSON file
 def load_github_usernames():
     try:
-        with open('user_info.json', 'r') as file:
+        with open('../user_info.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         return {}
