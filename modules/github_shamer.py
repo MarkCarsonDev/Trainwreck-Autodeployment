@@ -60,4 +60,5 @@ async def scheduled_shame_task(bot):
 
 def setup(bot):
     bot.add_command(shame)
+    scheduled_shame_task.bot = bot  # Pass the bot instance to the scheduled task
     bot.loop.create_task(scheduled_shame_task(bot))

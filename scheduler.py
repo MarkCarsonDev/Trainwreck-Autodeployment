@@ -12,7 +12,7 @@ def schedule(cron_schedule):
     """
     def decorator(func):
         trigger = CronTrigger.from_crontab(cron_schedule)
-        scheduler.add_job(func, trigger)
+        scheduler.add_job(func, trigger, args=[func.bot])
         return func
     return decorator
 
