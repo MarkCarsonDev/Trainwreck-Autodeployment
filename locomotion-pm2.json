@@ -1,5 +1,6 @@
 {
     "script": "Trainwreck-Autodeployment/locomotion.py",
+    "cwd": "./Trainwreck-Autodeployment/",
     "watch": true,
     "ignore_watch": ["user_info.json"],
     "watch_options": {
