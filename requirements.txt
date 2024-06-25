@@ -2,5 +2,6 @@ aiohttp
 beautifulsoup4
 bs4
 discord.py==2.3.2
-python-dateutil==2.8.2
-python-dotenv==0.21.1
+python-dateutil
+python-dotenv
+apscheduler
