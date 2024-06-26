@@ -37,18 +37,24 @@ async def shame(ctx):
     """
     usernames = load_github_usernames()
     min_commits = float('inf')
-    worst_user = None
+
+    worst_users = []
 
     for discord_id, info in usernames.items():
         github_username = info['github_username']
         commit_count = await fetch_commits_in_last_week(github_username)
-        if commit_count is not None and commit_count < min_commits:
-            min_commits = commit_count
-            worst_user = (discord_id, github_username)
+        if commit_count is not None and commit_count <= min_commits:
+            if min_commits < commit_count:
+                worst_users = []
 
-    if worst_user:
-        discord_user = await ctx.bot.fetch_user(worst_user[0])
-        await ctx.reply(f"{discord_user.mention} has made the least commits ({min_commits}) in the last week! Shame!")
+            worst_users.append((discord_id, github_username))
+            min_commits = commit_count
+            
+
+    if len(worst_users):
+        mentions = [await ctx.bot.fetch_user(user[0]) for user in worst_users]
+        
+        await ctx.reply(f"Shame on you, {', '.join([mention.mention for mention in mentions])}! You have made the least commits ({min_commits}) in the last week!")
 
 @schedule("0 17 * * 5")  # At 17:00 on Friday
 async def scheduled_shame_task(bot):
