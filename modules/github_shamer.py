@@ -44,7 +44,7 @@ async def shame(ctx):
         github_username = info['github_username']
         commit_count = await fetch_commits_in_last_week(github_username)
         if commit_count is not None and commit_count <= min_commits:
-            if min_commits < commit_count:
+            if commit_count < min_commits:
                 worst_users = []
 
             worst_users.append((discord_id, github_username))
