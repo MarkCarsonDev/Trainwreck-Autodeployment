@@ -61,6 +61,9 @@ async def setup_hook():
             if hasattr(module, 'setup'):
                 module.setup(bot)
 
+    from modules.hunter_pictures import setup as hunter_pictures_setup
+    await hunter_pictures_setup(bot)
+
     # Start the scheduler
     start_scheduler()
 
