@@ -14,7 +14,6 @@ from scheduler import start_scheduler
 # Load configuration from .env file 
 config = dotenv_values("../.locomotion-env")
 from scheduler import start_scheduler
-print(os.getcwd())
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -52,6 +51,10 @@ async def setup_hook():
     """
     Asynchronous setup hook for the bot.
     """
+    # Load the example module
+    from modules.example_module import setup as example_module_setup
+    example_module_setup(bot)
+
     # Load the roomfinder module
     from modules.roomfinder import setup as roomfinder_setup
     roomfinder_setup(bot)
