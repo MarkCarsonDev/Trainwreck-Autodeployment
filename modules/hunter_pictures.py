@@ -60,8 +60,7 @@ class HunterPictures(commands.Cog):
         print(payload.emoji.name)
         if user.bot:
             return
-        
-        message = reaction.message        # if message content isnt only a single media link, ignore
+              # if message content isnt only a single media link, ignore
         if len(message.content.split()) > 1:
             return
 
