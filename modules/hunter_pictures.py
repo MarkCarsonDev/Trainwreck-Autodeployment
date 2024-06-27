@@ -5,7 +5,7 @@ import json
 import os
 
 HUNTER_PICS_CHANNEL = 1164341156277145683
-PARENT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PARENT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 BLACKLIST_FILE = os.path.join(PARENT_DIR, 'hunter_pic_blacklist.json')
 
 class HunterPictures(commands.Cog):

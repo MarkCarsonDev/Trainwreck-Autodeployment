@@ -1,19 +1,11 @@
-import time
-import aiohttp
-from bs4 import BeautifulSoup
 import discord
 from discord.ext import commands
 from dotenv import dotenv_values
 import asyncio
-from datetime import datetime
 import os
-import json
-import re
-from scheduler import start_scheduler
 
 # Load configuration from .env file 
 config = dotenv_values("../.locomotion-env")
-from scheduler import start_scheduler
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -22,8 +14,41 @@ intents.message_content = True
 TOKEN = config["DISCORD_TOKEN"]
 TARGET_USER_ID = int(config["TARGET_USER_ID"])
 
-bot = commands.Bot(command_prefix='!', intents=intents, activity=discord.Activity(type=discord.ActivityType.watching, name="github.com/MarkCarsonDev/Trainwreck-Autodeployment"))
+class MyBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
+    async def setup_hook(self):
+        # Load the example module
+        from modules.example_module import setup as example_module_setup
+        example_module_setup(self)
+
+        # Load the roomfinder module
+        from modules.roomfinder import setup as roomfinder_setup
+        roomfinder_setup(self)
+
+        # Load the github module
+        from modules.github import setup as github_setup
+        github_setup(self)
+
+        # Load the github_schedule module
+        from modules.github_shamer import setup as github_schedule_setup
+        github_schedule_setup(self)
+
+        # Load the user manager module
+        from modules.user_manager import setup as user_manager_setup
+        user_manager_setup(self)
+
+        # Load the hunter_pictures module
+        from modules.hunter_pictures import setup as hunter_pictures_setup
+        hunter_pictures_setup(self)
+
+        # Start the scheduler
+        from scheduler import start_scheduler
+        start_scheduler()
+
+# Initialize the bot
+bot = MyBot(command_prefix='!', intents=intents, activity=discord.Activity(type=discord.ActivityType.watching, name="github.com/MarkCarsonDev/Trainwreck-Autodeployment"))
 
 async def send_message(user_id: int, message=None):
     """
@@ -44,37 +69,5 @@ async def on_ready():
     """
     print(f'{bot.user} is now running')
     await send_message(TARGET_USER_ID, "Bot has been started.")
-    # await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
-
-@bot.event
-async def setup_hook():
-    """
-    Asynchronous setup hook for the bot.
-    """
-    # Load the example module
-    from modules.example_module import setup as example_module_setup
-    example_module_setup(bot)
-
-    # Load the roomfinder module
-    from modules.roomfinder import setup as roomfinder_setup
-    roomfinder_setup(bot)
-
-    # Load the github module
-    from modules.github import setup as github_setup
-    github_setup(bot)
-
-    # Load the github_schedule module
-    from modules.github_shamer import setup as github_schedule_setup
-    github_schedule_setup(bot)
-
-    # Load the user manager module
-    from modules.user_manager import setup as user_manager_setup
-    user_manager_setup(bot)
-
-    # Load the hunter_pictures module
-    bot.load_extension('modules.hunter_pictures')
-
-    # Start the scheduler
-    start_scheduler()
 
 bot.run(TOKEN)
