@@ -2,7 +2,6 @@ import random
 import json
 import os
 from discord.ext import commands
-from discord import NotFound
 
 HUNTER_PICS_CHANNEL = 1164341156277145683
 BLACKLIST_FILE = '../hunter_pic_blacklist.json'
@@ -44,23 +43,7 @@ async def pookie(ctx):
         return
     
     chosen_media = random.choice(media_links)
-    sent_message = await ctx.send(chosen_media)
-    
-    @commands.Cog.listener()
-    async def on_reaction_add(reaction, user):
-        if user != ctx.bot.user and str(reaction.emoji) == '❌':
-            if reaction.message.id == sent_message.id:
-                blacklist = load_blacklist()
-                blacklist.append(chosen_media)
-                save_blacklist(blacklist)
-
-                media_links = await get_media_links(channel)
-                if not media_links:
-                    await sent_message.edit(content="No more available media.")
-                else:
-                    new_media = random.choice(media_links)
-                    await sent_message.edit(content=new_media)
-                await reaction.remove(user)
+    await ctx.send(chosen_media)
 
 def setup(bot):
     bot.add_command(pookie)
