@@ -37,7 +37,7 @@ async def get_media_links(channel):
 class HunterPictures(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.add_listener(self.on_reaction_add)
+        self.bot.add_listener(self.on_raw_reaction_add)
 
     @commands.command()
     async def pookie(self, ctx):
