@@ -55,7 +55,10 @@ class HunterPictures(commands.Cog):
         if payload.emoji.name != '❌':
             return
         message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-        user = payload.member
+        
+        user = self.bot.get_user(payload.user_id)
+        if not user:
+            user = await self.bot.fetch_user(payload.user_id)
 
         print(payload.emoji.name)
         if user.bot:
