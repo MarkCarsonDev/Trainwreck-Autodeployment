@@ -52,16 +52,16 @@ class HunterPictures(commands.Cog):
         sent_message = await ctx.send(chosen_media)
 
     async def on_raw_reaction_add(self, payload):
+        if payload.emoji.name != '❌':
+            return
         message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
-        reaction = discord.utils.get(message.reactions, emoji="❌")
         user = payload.member
 
-        print(reaction.emoji)
+        print(payload.emoji.name)
         if user.bot:
             return
         
-        message = reaction.message
-        # if message content isnt only a single media link, ignore
+        message = reaction.message        # if message content isnt only a single media link, ignore
         if len(message.content.split()) > 1:
             return
 
