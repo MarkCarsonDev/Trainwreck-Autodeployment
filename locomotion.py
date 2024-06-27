@@ -71,6 +71,10 @@ async def setup_hook():
     from modules.user_manager import setup as user_manager_setup
     user_manager_setup(bot)
 
+    # Load the hunter_pictures module
+    from modules.hunter_pictures import setup as hunter_pictures_setup
+    hunter_pictures_setup(bot)
+
     # Start the scheduler
     start_scheduler()
 
