@@ -51,33 +51,36 @@ class HunterPictures(commands.Cog):
         chosen_media = random.choice(media_links)
         sent_message = await ctx.send(chosen_media)
 
-    async def on_raw_reaction_add(self, reaction, user):
+    async def on_raw_reaction_add(self, payload):
+        message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+        reaction = discord.utils.get(message.reactions, emoji="❌")
+        user = payload.member
+
         print(reaction.emoji)
         if user.bot:
             return
         
-        if reaction.emoji == '❌':
-            message = reaction.message
-            # if message content isnt only a single media link, ignore
-            if len(message.content.split()) > 1:
-                return
+        message = reaction.message
+        # if message content isnt only a single media link, ignore
+        if len(message.content.split()) > 1:
+            return
 
-            if message.author.id != self.bot.user.id:
-                return
+        if message.author.id != self.bot.user.id:
+            return
 
-            blacklist = load_blacklist()
-            blacklist.append(message.content)
-            print(f'Pookie blacklist updated: {blacklist}')
-            save_blacklist(blacklist)
+        blacklist = load_blacklist()
+        blacklist.append(message.content)
+        print(f'Pookie blacklist updated: {blacklist}')
+        save_blacklist(blacklist)
 
-            channel = self.bot.get_channel(HUNTER_PICS_CHANNEL)
-            media_links = await get_media_links(channel)
-            if not media_links:
-                await message.edit(content="No more available media.")
-            else:
-                new_media = random.choice(media_links)
-                await message.edit(content=new_media)
-            await reaction.remove(user)
+        channel = self.bot.get_channel(HUNTER_PICS_CHANNEL)
+        media_links = await get_media_links(channel)
+        if not media_links:
+            await message.edit(content="No more available media.")
+        else:
+            new_media = random.choice(media_links)
+            await message.edit(content=new_media)
+        await reaction.remove(user)
 
 async def setup(bot):
     await bot.add_cog(HunterPictures(bot))
