@@ -61,7 +61,6 @@ async def setup_hook():
             if hasattr(module, 'setup'):
                 module.setup(bot)
 
-
     # Start the scheduler
     start_scheduler()
 
