@@ -67,6 +67,7 @@ class HunterPictures(commands.Cog):
 
             blacklist = load_blacklist()
             blacklist.append(message.content)
+            print(f'Pookie blacklist updated: {blacklist}')
             save_blacklist(blacklist)
 
             channel = self.bot.get_channel(HUNTER_PICS_CHANNEL)
