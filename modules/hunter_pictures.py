@@ -79,5 +79,5 @@ class HunterPictures(commands.Cog):
                 await message.edit(content=new_media)
             await reaction.remove(user)
 
-def setup(bot):
-    bot.add_cog(HunterPictures(bot))
+async def setup(bot):
+    await bot.add_cog(HunterPictures(bot))
