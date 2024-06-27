@@ -51,7 +51,7 @@ class HunterPictures(commands.Cog):
         chosen_media = random.choice(media_links)
         sent_message = await ctx.send(chosen_media)
 
-    async def on_reaction_add(self, reaction, user):
+    async def on_raw_reaction_add(self, reaction, user):
         print(reaction.emoji)
         if user.bot:
             return
