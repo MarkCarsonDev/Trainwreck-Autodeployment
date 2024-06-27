@@ -79,7 +79,7 @@ class HunterPictures(commands.Cog):
         else:
             new_media = random.choice(media_links)
             await message.edit(content=new_media)
-        await reaction.remove(user)
+        await message.remove_reaction(payload.emoji, user)
 
 async def setup(bot):
     await bot.add_cog(HunterPictures(bot))
