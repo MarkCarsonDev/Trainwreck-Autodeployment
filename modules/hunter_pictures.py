@@ -50,7 +50,6 @@ class HunterPictures(commands.Cog):
         
         chosen_media = random.choice(media_links)
         sent_message = await ctx.send(chosen_media)
-        await sent_message.add_reaction('❌')
 
     async def on_reaction_add(self, reaction, user):
         print(reaction.emoji)
