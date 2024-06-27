@@ -53,12 +53,14 @@ class HunterPictures(commands.Cog):
         await sent_message.add_reaction('❌')
 
     async def on_reaction_add(self, reaction, user):
+        print(reaction.emoji)
         if user.bot:
             return
         
         if reaction.emoji == '❌':
             message = reaction.message
-            if message.channel.id != HUNTER_PICS_CHANNEL:
+            # if message content isnt only a single media link, ignore
+            if len(message.content.split()) > 1:
                 return
 
             if message.author.id != self.bot.user.id:
