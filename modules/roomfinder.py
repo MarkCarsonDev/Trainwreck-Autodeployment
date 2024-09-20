@@ -8,7 +8,7 @@ from datetime import datetime
 from discord.ext import commands
 
 # URL to scrape for course information
-course_schedule_url = "https://web.csulb.edu/depts/enrollment/registration/class_schedule/Spring_2024/By_Subject/"
+course_schedule_url = "https://web.csulb.edu/depts/enrollment/registration/class_schedule/Fall_2024/By_Subject/"
 room_bookings = []
 
 WEEKDAY_ABBR = {
@@ -163,7 +163,7 @@ async def findroom(ctx, arg1 = None, *args):
             try:
                 custom_day = args[args.index("--d") + 1].strip()
                 print(f"-{custom_day}-")
-                if custom_day.upper() in WEEKDAY_ABBR.values():
+                if custom_day.upper() in map(lambda x: x.upper(), WEEKDAY_ABBR.values()):
                     custom_day = custom_day.upper()
                 else:
                     await ctx.reply(f"Invalid day format. Please use a valid day abbreviation: {WEEKDAY_ABBR.values()}.")

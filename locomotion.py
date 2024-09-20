@@ -43,8 +43,8 @@ async def on_ready():
     """
     Called when the bot is ready. Sets up the monitoring task.
     """
-    print(f'{bot.user} is now running')
-    await send_message(TARGET_USER_ID, "Bot has been started.")
+    print(f'[{datetime.now()}] {bot.user} is now running')
+    await send_message(TARGET_USER_ID, f"Bot has been started at {datetime.now()}")
     # await bot.change_presence(activity=discord.Game(name="ray is so super sexyyyyyy ahahaaaa"))
 
 @bot.event
@@ -60,6 +60,8 @@ async def setup_hook():
             module = importlib.import_module(module_path)
             if hasattr(module, 'setup'):
                 module.setup(bot)
+
+            print(f"Loaded module: {module_name}")
 
     from modules.hunter_pictures import setup as hunter_pictures_setup
     await hunter_pictures_setup(bot)
