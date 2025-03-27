@@ -5,3 +5,4 @@ discord.py==2.3.2
 python-dateutil
 python-dotenv
 apscheduler
+matplotlib
