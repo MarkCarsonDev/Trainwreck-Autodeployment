@@ -144,11 +144,15 @@ async def stats(ctx, member: discord.Member = None):
         inline=True
     )
     
+    # Get message counts
+    dates, message_counts = await get_user_message_counts(ctx.guild, member.id)
+    total_messages = sum(message_counts)
+    
     # Add join date and total messages
     embed.add_field(
         name="Discord Info",
         value=f"📅 Joined: {discord.utils.format_dt(member.joined_at, 'D')}\n" +
-              f"🔤 Messages (30 days): {sum(await get_user_message_counts(ctx.guild, member.id)[1])}",
+              f"🔤 Messages (30 days): {total_messages}",
         inline=False
     )
     
