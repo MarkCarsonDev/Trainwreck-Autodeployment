@@ -95,94 +95,105 @@ async def stats(ctx, member: discord.Member = None):
     if member is None:
         member = ctx.author
     
-    user_info = load_user_info()
-    user_id = str(member.id)
+    # Send a loading message first
+    loading_message = await ctx.reply(f"{ctx.author.mention} I'm generating stats for {member.display_name}... This might take a moment due to Discord rate limits.")
     
-    # If user not in database, initialize them
-    if user_id not in user_info:
-        await ctx.send(f"No stats available for {member.display_name}. They need to set their GitHub username first!")
-        return
-    
-    user_data = user_info[user_id]
-    
-    # Create embed
-    embed = discord.Embed(
-        title=f"📊 {member.display_name}'s Profile",
-        description=f"Stats for {member.mention}",
-        color=member.color if member.color != discord.Color.default() else discord.Color.blurple()
-    )
-    
-    # Add GitHub info
-    if 'github_username' in user_data:
-        github_info = await fetch_github_data(user_data['github_username'])
-        if github_info:
-            embed.add_field(
-                name="GitHub",
-                value=f"[{user_data['github_username']}](https://github.com/{user_data['github_username']})\n" +
-                      f"Repos: {github_info.get('public_repos', 'N/A')}\n" +
-                      f"Followers: {github_info.get('followers', 'N/A')}",
-                inline=True
-            )
-    
-    # Add points and streaks
-    points = user_data.get('points', 0)
-    streak_weeks = user_data.get('streak_weeks', 0)
-    
-    embed.add_field(
-        name="Points & Streaks",
-        value=f"🏆 Points: **{points}**\n" +
-              f"🔥 Streak: **{streak_weeks}** weeks\n" +
-              f"Current Multiplier: **{round(1.2 ** streak_weeks, 2)}x**",
-        inline=True
-    )
-    
-    # Add shame counter
-    shame_count = user_data.get('shame_count', 0)
-    embed.add_field(
-        name="Hall of Shame",
-        value=f"😱 Shamed **{shame_count}** times",
-        inline=True
-    )
-    
-    # Get message counts
-    dates, message_counts = await get_user_message_counts(ctx.guild, member.id)
-    total_messages = sum(message_counts)
-    
-    # Add join date and total messages
-    embed.add_field(
-        name="Discord Info",
-        value=f"📅 Joined: {discord.utils.format_dt(member.joined_at, 'D')}\n" +
-              f"🔤 Messages (30 days): {total_messages}",
-        inline=False
-    )
-    
-    # Add custom user information
-    custom_info = []
-    for key, value in user_data.items():
-        # Skip standard fields
-        if key in ['github_username', 'points', 'streak_weeks', 'shame_count']:
-            continue
-        custom_info.append(f"**{key.replace('_', ' ').title()}**: {value}")
-    
-    if custom_info:
+    try:
+        user_info = load_user_info()
+        user_id = str(member.id)
+        
+        # If user not in database, initialize them
+        if user_id not in user_info:
+            await loading_message.delete()
+            await ctx.send(f"No stats available for {member.display_name}. They need to set their GitHub username first!")
+            return
+        
+        user_data = user_info[user_id]
+        
+        # Create embed
+        embed = discord.Embed(
+            title=f"📊 {member.display_name}'s Profile",
+            description=f"Stats for {member.mention}",
+            color=member.color if member.color != discord.Color.default() else discord.Color.blurple()
+        )
+        
+        # Add GitHub info
+        if 'github_username' in user_data:
+            github_info = await fetch_github_data(user_data['github_username'])
+            if github_info:
+                embed.add_field(
+                    name="GitHub",
+                    value=f"[{user_data['github_username']}](https://github.com/{user_data['github_username']})\n" +
+                          f"Repos: {github_info.get('public_repos', 'N/A')}\n" +
+                          f"Followers: {github_info.get('followers', 'N/A')}",
+                    inline=True
+                )
+        
+        # Add points and streaks
+        points = user_data.get('points', 0)
+        streak_weeks = user_data.get('streak_weeks', 0)
+        
         embed.add_field(
-            name="Custom Info",
-            value="\n".join(custom_info),
+            name="Points & Streaks",
+            value=f"🏆 Points: **{points}**\n" +
+                  f"🔥 Streak: **{streak_weeks}** weeks\n" +
+                  f"Current Multiplier: **{round(1.2 ** streak_weeks, 2)}x**",
+            inline=True
+        )
+        
+        # Add shame counter
+        shame_count = user_data.get('shame_count', 0)
+        embed.add_field(
+            name="Hall of Shame",
+            value=f"😱 Shamed **{shame_count}** times",
+            inline=True
+        )
+        
+        # Get message counts
+        dates, message_counts = await get_user_message_counts(ctx.guild, member.id)
+        total_messages = sum(message_counts)
+        
+        # Add join date and total messages
+        embed.add_field(
+            name="Discord Info",
+            value=f"📅 Joined: {discord.utils.format_dt(member.joined_at, 'D')}\n" +
+                  f"🔤 Messages (30 days): {total_messages}",
             inline=False
         )
-    
-    # Set user avatar as thumbnail
-    embed.set_thumbnail(url=member.display_avatar.url)
-    
-    # Generate and attach activity graph
-    activity_graph = await generate_activity_graph(ctx.guild, member.id)
-    file = discord.File(activity_graph, filename="activity.png")
-    embed.set_image(url="attachment://activity.png")
-    
-    # Add footer
-    embed.set_footer(text=f"ID: {member.id} • Stats last updated: {discord.utils.format_dt(datetime.now(), 'R')}")
-    
-    await ctx.send(file=file, embed=embed)
+        
+        # Add custom user information
+        custom_info = []
+        for key, value in user_data.items():
+            # Skip standard fields
+            if key in ['github_username', 'points', 'streak_weeks', 'shame_count']:
+                continue
+            custom_info.append(f"**{key.replace('_', ' ').title()}**: {value}")
+        
+        if custom_info:
+            embed.add_field(
+                name="Custom Info",
+                value="\n".join(custom_info),
+                inline=False
+            )
+        
+        # Set user avatar as thumbnail
+        embed.set_thumbnail(url=member.display_avatar.url)
+        
+        # Generate and attach activity graph
+        activity_graph = await generate_activity_graph(ctx.guild, member.id)
+        file = discord.File(activity_graph, filename="activity.png")
+        embed.set_image(url="attachment://activity.png")
+        
+        # Add footer
+        embed.set_footer(text=f"ID: {member.id} • Stats last updated: {discord.utils.format_dt(datetime.now(), 'R')}")
+        
+        # Delete the loading message and send the stats
+        await loading_message.delete()
+        await ctx.send(file=file, embed=embed)
+        
+    except Exception as e:
+        # If something goes wrong, edit the loading message to show the error
+        await loading_message.edit(content=f"Error generating stats: {str(e)}")
 
 def setup(bot):
     bot.add_command(stats)

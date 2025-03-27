@@ -106,12 +106,8 @@ def get_praise_message(commits, points, streak_weeks):
     
     return message
 
-@commands.command()
-async def praise(ctx):
-    """
-    Praises users for their GitHub commits and awards points.
-    """
-    user_info = load_user_info()
+async def generate_praise_embed(ctx, user_info):
+    """Generate praise embed with messages"""
     praise_messages = []
     
     for discord_id, info in user_info.items():
@@ -160,9 +156,39 @@ async def praise(ctx):
         embed.add_field(name="Top Contributors", value="\n".join(praise_messages), inline=False)
         embed.set_footer(text="Next evaluation in one week. Keep it up, superstars.")
         
-        await ctx.send(embed=embed)
+        return embed
     else:
-        await ctx.send("No GitHub activity found for any users this week. You all disappoint me.")
+        return "No GitHub activity found for any users this week. You all disappoint me."
+
+@commands.command()
+async def praise(ctx):
+    """
+    Praises users for their GitHub commits and awards points.
+    """
+    user_info = load_user_info()
+    praise_result = await generate_praise_embed(ctx, user_info)
+    
+    if isinstance(praise_result, discord.Embed):
+        await ctx.send(embed=praise_result)
+    else:
+        await ctx.send(praise_result)
+
+@commands.command()
+async def testpraise(ctx):
+    """
+    Tests the praise functionality in the current channel without updating points.
+    """
+    user_info = load_user_info()
+    # Create a copy to avoid modifying real data
+    test_info = json.loads(json.dumps(user_info))
+    
+    praise_result = await generate_praise_embed(ctx, test_info)
+    
+    # Don't save the user info since this is just a test
+    if isinstance(praise_result, discord.Embed):
+        await ctx.send("**TEST MODE - Points not actually awarded**", embed=praise_result)
+    else:
+        await ctx.send(f"**TEST MODE:** {praise_result}")
 
 @schedule("0 16 * * 5")  # At 16:00 on Friday (1 hour before shame)
 async def scheduled_praise_task(bot):
@@ -173,4 +199,5 @@ async def scheduled_praise_task(bot):
 
 def setup(bot):
     bot.add_command(praise)
+    bot.add_command(testpraise)
     scheduled_praise_task.start_task(bot)
