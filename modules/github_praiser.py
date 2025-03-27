@@ -5,6 +5,7 @@ from scheduler import schedule
 from datetime import datetime, timedelta
 import discord
 import random
+import copy
 
 PRAISE_CHANNEL_ID = 1082164945438916679  # Same as shame channel for now
 
@@ -28,7 +29,7 @@ async def fetch_commits_in_last_week(username):
     daily_commits is a dict mapping days to commit counts
     """
     one_week_ago = datetime.now() - timedelta(days=7)
-    url = f'https://api.github.com/users/{username}/events/public'
+    url = f'https://api.github.com/users/{username}/events'
     
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -57,7 +58,7 @@ async def fetch_commits_in_last_week(username):
 
 def calculate_points(commits, daily_commits, user_info):
     """Calculate points based on commits, streaks, and bonuses"""
-    points = commits
+    points = commits * 69
     
     # Check if user made commits every day
     daily_streak = all(count > 0 for count in daily_commits.values())
@@ -88,7 +89,7 @@ def update_streak(user_id, commits, user_info):
 def get_praise_message(commits, points, streak_weeks):
     """Generate a praise message based on performance"""
     praise_messages = [
-        f"Your work on {commits} commits has earned you {points} points!",
+        f"Your work on {commits} commit{'' if commits == 1 else 's'} has earned you {points} points!",
     ]
     
     streak_messages = [
@@ -96,7 +97,6 @@ def get_praise_message(commits, points, streak_weeks):
         f"You're on a {streak_weeks}-week streak! Way to show off...",
         f"You're on a {streak_weeks}-week streak! Too bad it won't get you a job.",
         f"You're on a {streak_weeks}-week streak! good job cutie :)",
-        
     ]
     
     message = random.choice(praise_messages)
@@ -106,30 +106,43 @@ def get_praise_message(commits, points, streak_weeks):
     
     return message
 
-async def generate_praise_embed(ctx, user_info):
-    """Generate praise embed with messages"""
-    praise_messages = []
+async def generate_praise_embed(ctx, user_info, update_data=True):
+    """
+    Generate praise embed with messages
     
-    for discord_id, info in user_info.items():
+    Args:
+        ctx: The command context
+        user_info: The user info dictionary
+        update_data: Whether to update the user info with new points and streaks
+    
+    Returns:
+        Either an embed or a string message
+    """
+    praise_messages = []
+    # Make a deep copy to avoid modifying the original if we're not updating
+    working_info = user_info if update_data else copy.deepcopy(user_info)
+    
+    for discord_id, info in working_info.items():
         if 'github_username' in info:
             github_username = info['github_username']
             commits, daily_commits = await fetch_commits_in_last_week(github_username)
             
             # Initialize points if not exists
             if 'points' not in info:
-                user_info[discord_id]['points'] = 0
+                working_info[discord_id]['points'] = 0
             
             # Initialize streak_weeks if not exists
             if 'streak_weeks' not in info:
-                user_info[discord_id]['streak_weeks'] = 0
+                working_info[discord_id]['streak_weeks'] = 0
             
             # Calculate points
             streak_weeks = info.get('streak_weeks', 0)
             points = calculate_points(commits, daily_commits, info)
             
             # Update user info
-            user_info[discord_id]['points'] = info.get('points', 0) + points
-            user_info = update_streak(discord_id, commits, user_info)
+            if update_data:
+                working_info[discord_id]['points'] = info.get('points', 0) + points
+                working_info = update_streak(discord_id, commits, working_info)
             
             # Get user mention
             try:
@@ -138,13 +151,15 @@ async def generate_praise_embed(ctx, user_info):
                 
                 # Generate praise message
                 if commits > 0:
-                    message = f"{user_mention}: " + get_praise_message(commits, points, user_info[discord_id]['streak_weeks'])
+                    next_streak = streak_weeks + 1 if commits > 0 else 0
+                    message = f"{user_mention}: " + get_praise_message(commits, points, next_streak)
                     praise_messages.append(message)
             except:
                 continue
     
-    # Save updated user info
-    save_user_info(user_info)
+    # Save updated user info ONLY if we are updating
+    if update_data:
+        save_user_info(working_info)
     
     if praise_messages:
         embed = discord.Embed(
@@ -166,7 +181,7 @@ async def praise(ctx):
     Praises users for their GitHub commits and awards points.
     """
     user_info = load_user_info()
-    praise_result = await generate_praise_embed(ctx, user_info)
+    praise_result = await generate_praise_embed(ctx, user_info, update_data=True)
     
     if isinstance(praise_result, discord.Embed):
         await ctx.send(embed=praise_result)
@@ -179,12 +194,8 @@ async def testpraise(ctx):
     Tests the praise functionality in the current channel without updating points.
     """
     user_info = load_user_info()
-    # Create a copy to avoid modifying real data
-    test_info = json.loads(json.dumps(user_info))
+    praise_result = await generate_praise_embed(ctx, user_info, update_data=False)
     
-    praise_result = await generate_praise_embed(ctx, test_info)
-    
-    # Don't save the user info since this is just a test
     if isinstance(praise_result, discord.Embed):
         await ctx.send("**TEST MODE - Points not actually awarded**", embed=praise_result)
     else:

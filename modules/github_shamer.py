@@ -22,7 +22,7 @@ def save_user_info(data):
 
 async def fetch_commits_in_last_week(username):
     one_week_ago = datetime.now() - timedelta(days=7)
-    url = f'https://api.github.com/users/{username}/events/public'
+    url = f'https://api.github.com/users/{username}/events'
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status != 200:

@@ -2,7 +2,7 @@ import aiohttp
 from discord.ext import commands
 
 async def fetch_latest_commit_date(username):
-    url = f'https://api.github.com/users/{username}/events/public'
+    url = f'https://api.github.com/users/{username}/events'
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status != 200:
