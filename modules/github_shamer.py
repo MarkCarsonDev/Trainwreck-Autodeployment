@@ -40,20 +40,31 @@ async def shame(ctx):
 
     worst_users = []
 
-    for discord_id, info in usernames.items():
-        github_username = info['github_username']
-        commit_count = await fetch_commits_in_last_week(github_username)
-        if commit_count is not None and commit_count <= min_commits:
-            if commit_count < min_commits:
-                worst_users = []
-
-            worst_users.append((discord_id, github_username))
-            min_commits = commit_count
+    for discord_id, info in user_info.items():
+        if 'github_username' in info:
+            github_username = info['github_username']
+            commit_count = await fetch_commits_in_last_week(github_username)
             
+            if commit_count is not None and commit_count <= min_commits:
+                if commit_count < min_commits:
+                    worst_users = []
+                
+                worst_users.append((discord_id, github_username))
+                min_commits = commit_count
 
-    if len(worst_users):
-        mentions = [await ctx.bot.fetch_user(user[0]) for user in worst_users]
+    if worst_users:
+        # Update shame count for each user
+        for discord_id, _ in worst_users:
+            if discord_id in user_info:
+                if 'shame_count' not in user_info[discord_id]:
+                    user_info[discord_id]['shame_count'] = 0
+                user_info[discord_id]['shame_count'] += 1
         
+        # Save updated user info
+        save_user_info(user_info)
+        
+        # Create shame message
+        mentions = [await ctx.bot.fetch_user(int(user[0])) for user in worst_users]
         await ctx.reply(f"Shame on you, {', '.join([mention.mention for mention in mentions])}! You have made the least commits ({min_commits}) in the last week!")
 
 @schedule("0 17 * * 5")  # At 17:00 on Friday

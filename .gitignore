@@ -1,2 +1,4 @@
 user_info.json
 venv
+.qodo
+*.pyc
