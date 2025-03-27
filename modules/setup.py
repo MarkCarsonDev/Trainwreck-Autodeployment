@@ -24,13 +24,13 @@ async def validate_github_username(username):
             return response.status == 200
 
 @commands.command()
-async def setup(ctx, github_username=None):
+async def setupuser(ctx, github_username=None):
     """
     Set up your profile with your GitHub username.
-    Example: !setup johndoe
+    Example: !setupuser johndoe
     """
     if github_username is None:
-        await ctx.send("Please provide your GitHub username. Example: `!setup johndoe`")
+        await ctx.send("Please provide your GitHub username. Example: `!setupuser johndoe`")
         return
     
     # Validate GitHub username
@@ -148,7 +148,7 @@ async def removeinfo(ctx, key=None):
     
     # Check if user exists
     if user_id not in user_info:
-        await ctx.send("❌ You need to set up your profile first. Use `!setup <github_username>`")
+        await ctx.send("❌ You need to set up your profile first. Use `!setupuser <github_username>`")
         return
     
     # Check if key exists
@@ -165,6 +165,6 @@ async def removeinfo(ctx, key=None):
     await ctx.send(f"✅ Removed `{key}` from your profile.")
 
 def setup(bot):
-    bot.add_command(setup)
+    bot.add_command(setupuser)
     bot.add_command(addinfo)
     bot.add_command(removeinfo)
