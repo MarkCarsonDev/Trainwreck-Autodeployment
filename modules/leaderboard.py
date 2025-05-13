@@ -14,7 +14,7 @@ def load_user_info():
     except FileNotFoundError:
         return {}
 
-async def generate_leaderboard_chart(ctx, user_entries, sort_field, title_text):
+async def generate_leaderboard_chart(ctx, user_entries, sort_field, title_text, limit):
     """Generates a bar chart visualization for the leaderboard"""
     # Create a bar chart of the top users
     plt.figure(figsize=(10, 6))
@@ -23,15 +23,10 @@ async def generate_leaderboard_chart(ctx, user_entries, sort_field, title_text):
     # Even if the user requests more in the leaderboard text
     # chart_entries = user_entries[:min(8, len(user_entries))]
 
-    # Get 8 or fewer for the chart, but if an argument for number is given, use the top 4 total and bottom 4 from that point
+    # Get 8 or fewer for the chart, but if an argument for number is given, use the top 4 total and bottom 4 until that point limit
     chart_entries = user_entries[:min(4, len(user_entries))]
-    if len(user_entries) > 8:
-        chart_entries += user_entries[-4:]
-    else:   
-        chart_entries += user_entries[4:8]
-    # Sort the chart entries by the specified field
-    chart_entries.sort(key=lambda x: x[sort_field], reverse=True)
-    chart_entries = chart_entries[:8]  # Limit to top 8 for the chart
+    chart_entries += user_entries[max(limit-4, 4):min(len(user_entries), limit)]
+    chart_entries = chart_entries[:8]  # Limit to 8 entries for the chart
     
     # Get usernames and values
     usernames = []
@@ -186,11 +181,11 @@ async def leaderboard(ctx, limit="10"):
             )
             
         # Add footer
-        embed.set_footer(text=f"Use !leaderboard [points|streaks|shame] to view different rankings • Last updated: {discord.utils.format_dt(datetime.now(), 'R')}")
+        embed.set_footer(text=f"Use !leaderboard [quantity] • Last updated: {discord.utils.format_dt(datetime.now(), 'R')}")
         
         # Generate and attach bar chart if we have entries
         if len(user_entries) > 0:
-            chart_file = await generate_leaderboard_chart(ctx, user_entries, sort_field, title)
+            chart_file = await generate_leaderboard_chart(ctx, user_entries, sort_field, title, limit)
             embed.set_image(url="attachment://leaderboard.png")
             
             # Delete the loading message and send the leaderboard with chart
