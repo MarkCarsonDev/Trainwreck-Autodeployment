@@ -19,8 +19,19 @@ async def generate_leaderboard_chart(ctx, user_entries, sort_field, title_text):
     # Create a bar chart of the top users
     plt.figure(figsize=(10, 6))
     
-    # Get top 8 or fewer users for better readability
-    chart_entries = user_entries[:min(8, len(user_entries))]
+    # Get top 8 or fewer users for better readability in the chart
+    # Even if the user requests more in the leaderboard text
+    # chart_entries = user_entries[:min(8, len(user_entries))]
+
+    # Get 8 or fewer for the chart, but if an argument for number is given, use the top 4 total and bottom 4 from that point
+    chart_entries = user_entries[:min(4, len(user_entries))]
+    if len(user_entries) > 8:
+        chart_entries += user_entries[-4:]
+    else:   
+        chart_entries += user_entries[4:8]
+    # Sort the chart entries by the specified field
+    chart_entries.sort(key=lambda x: x[sort_field], reverse=True)
+    chart_entries = chart_entries[:8]  # Limit to top 8 for the chart
     
     # Get usernames and values
     usernames = []
@@ -66,11 +77,18 @@ async def generate_leaderboard_chart(ctx, user_entries, sort_field, title_text):
     return discord.File(buf, filename="leaderboard.png")
 
 @commands.command()
-async def leaderboard(ctx, category="points"):
+async def leaderboard(ctx, limit="10"):
     """
-    Shows the leaderboard ranking users by points, streaks, or shame count.
-    Usage: !leaderboard [points|streaks|shame]
+    Shows the leaderboard ranking users by points.
+    Usage: !leaderboard [number]
+    Example: !leaderboard 20 - Shows top 20 users
     """
+    # Check if the argument is a number
+    if not limit.isdigit():
+        await ctx.reply(f"Invalid argument. Please provide a number (e.g., !leaderboard 20)")
+        return
+        
+    limit = int(limit)
     user_info = load_user_info()
     
     # Send a loading message first
@@ -98,27 +116,11 @@ async def leaderboard(ctx, category="points"):
             user_entries.append(entry)
         
         # Sort based on category
-        if category.lower() == "points":
-            user_entries.sort(key=lambda x: x['points'], reverse=True)
-            title = "🏆 Points Leaderboard"
-            description = "Who's putting in commits?"
-            sort_field = "points"
-            sort_emoji = "🏆"
-        elif category.lower() == "streaks":
-            user_entries.sort(key=lambda x: x['streak_weeks'], reverse=True)
-            title = "🔥 Streak Leaderboard"
-            description = "Who's on fire?"
-            sort_field = "streak_weeks"
-            sort_emoji = "🔥"
-        elif category.lower() == "shame":
-            user_entries.sort(key=lambda x: x['shame_count'], reverse=True)
-            title = "😱 Shame Leaderboard"
-            description = "Who's slackin?"
-            sort_field = "shame_count"
-            sort_emoji = "😱"
-        else:
-            await loading_message.edit(content=f"Invalid category. Use 'points', 'streaks', or 'shame'.")
-            return
+        user_entries.sort(key=lambda x: x['points'], reverse=True)
+        title = "🏆 Points Leaderboard"
+        description = "Who's putting in commits?"
+        sort_field = "points"
+        sort_emoji = "🏆"
         
         # Generate leaderboard embed
         embed = discord.Embed(
@@ -130,7 +132,7 @@ async def leaderboard(ctx, category="points"):
         # Generate the leaderboard entries
         leaderboard_text = []
         
-        for i, entry in enumerate(user_entries[:10]):  # Top 10 users
+        for i, entry in enumerate(user_entries[:limit]):  # Use limit parameter
             try:
                 # Fetch Discord user
                 user = await ctx.bot.fetch_user(int(entry['id']))
@@ -142,7 +144,7 @@ async def leaderboard(ctx, category="points"):
                 # Create leaderboard entry
                 entry_text = (
                     f"{rank_emoji} **{username}** [@{entry['github_username']}]\n"
-                    f"   {sort_emoji} **{entry[sort_field]}** | 🏆 Points: {entry['points']} | "
+                    f"   {sort_emoji} **{entry[sort_field]}** | "
                     f"🔥 Streak: {entry['streak_weeks']} (x{entry['multiplier']}) | "
                     f"😱 Shame: {entry['shame_count']}"
                 )
